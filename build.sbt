@@ -20,6 +20,8 @@ crossScalaVersions := Seq("2.10.5", "2.11.6")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-target:jvm-1.7")
 
+isSnapshot := true // Dangerous but necessary for internal builds
+
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC2",
   "org.apache.kafka" %% "kafka" % "0.8.2.1",
