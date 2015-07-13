@@ -2,7 +2,6 @@
 
 import scalariform.formatter.preferences.{SpacesAroundMultiImports, CompactControlReadability, PreserveSpaceBeforeArguments, DoubleIndentClassDeclaration}
 
-sonatypeSettings
 //sonatypeSettings
 
 name := "reactive-kafka"
