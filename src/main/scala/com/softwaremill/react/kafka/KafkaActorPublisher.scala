@@ -6,7 +6,6 @@ import kafka.consumer.{ConsumerTimeoutException, KafkaConsumer}
 import kafka.serializer.Decoder
 
 import scala.annotation.tailrec
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 private[kafka] class KafkaActorPublisher[T](consumer: KafkaConsumer, decoder: Decoder[T]) extends ActorPublisher[T] {
@@ -18,27 +17,32 @@ private[kafka] class KafkaActorPublisher[T](consumer: KafkaConsumer, decoder: De
     case ActorPublisherMessage.Cancel | ActorPublisherMessage.SubscriptionTimeoutExceeded => cleanupResources()
   }
 
-  private def tryReadingSingleElement() = {
-    Try(iterator.next().message()).map(bytes => Some(decoder.fromBytes(bytes))).recover {
+  private def demand_? : Boolean = totalDemand > 0
+
+  private def tryReadingSingleElement(): Try[Option[T]] = {
+
+    Try {
+      val bytes = if (iterator.hasNext() && demand_?) Option(iterator.next().message()) else None
+      bytes.map(decoder.fromBytes)
+    } recover {
       // We handle timeout exceptions as normal 'end of the queue' cases
       case _: ConsumerTimeoutException => None
     }
   }
 
   @tailrec
-  private def readDemandedItems() {
-      tryReadingSingleElement() match {
-        case Success(None) =>
-          if (totalDemand > 0)
-            self ! Poll
-        case Success(valueOpt) =>
-          valueOpt.foreach(element => onNext(element))
-          if (totalDemand > 0) readDemandedItems()
-        case Failure(ex) => onError(ex)
+  private def readDemandedItems(): Unit = {
+    tryReadingSingleElement() match {
+      case Success(None) =>
+        if (demand_?) self ! Poll
+      case Success(Some(element)) =>
+        onNext(element)
+        if (demand_?) readDemandedItems()
+      case Failure(ex) => onError(ex)
     }
   }
 
-  private def cleanupResources() {
+  private def cleanupResources(): Unit = {
     consumer.close()
     context.stop(self)
   }

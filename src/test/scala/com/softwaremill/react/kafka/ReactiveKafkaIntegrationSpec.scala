@@ -15,14 +15,16 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class ReactiveKafkaIntegrationSpec(_system: ActorSystem) extends TestKit(_system) with ImplicitSender with WordSpecLike
-with Matchers with BeforeAndAfterAll {
+    with Matchers with BeforeAndAfterAll {
 
   def this() = this(ActorSystem("ReactiveKafkaIntegrationSpec"))
 
   def uuid() = UUID.randomUUID().toString
   implicit val timeout = Timeout(1 second)
 
-  override def afterAll {
+  def parititonizer(in: String): Option[Array[Byte]] = Some(in.hashCode().toInt.toString.getBytes)
+
+  override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 
@@ -35,7 +37,7 @@ with Matchers with BeforeAndAfterAll {
       val kafka = newKafka()
       val encoder = new StringEncoder()
       val publisher = kafka.consume(topic, group, new StringDecoder())(system)
-      val kafkaSubscriber = kafka.publish(topic, group, encoder)(system)
+      val kafkaSubscriber = kafka.publish(topic, group, encoder, parititonizer)(system)
       val subscriberActor = system.actorOf(Props(new ReactiveTestSubscriber))
       val testSubscriber = ActorSubscriber[String](subscriberActor)
       publisher.subscribe(testSubscriber)
@@ -59,7 +61,7 @@ with Matchers with BeforeAndAfterAll {
       shouldStartConsuming(fromEnd = true)
     }
 
-    def shouldStartConsuming(fromEnd: Boolean) {
+    def shouldStartConsuming(fromEnd: Boolean): Unit = {
       // given
       val kafka = newKafka()
       val topic = uuid()
