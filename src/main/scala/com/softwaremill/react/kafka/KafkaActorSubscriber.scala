@@ -33,7 +33,7 @@ private[kafka] class KafkaActorSubscriber[T](
   }
 
   private def handleError(ex: Throwable) = {
-    log.error("Stopping subscriber due to an error", ex)
+    log.error("Stopping subscriber due to an error {}", ex)
     producer.close()
     context.stop(self)
   }
