@@ -4,8 +4,8 @@ import scalariform.formatter.preferences.{SpacesAroundMultiImports, CompactContr
 
 name := "reactive-kafka"
 
-val akkaVersion = "2.3.14"
-val akkaStreamVersion = "1.0"
+val akkaVersion = "2.4.0"
+val akkaStreamVersion = "2.0-M1"
 val curatorVersion = "2.9.0"
 
 val kafka = "org.apache.kafka" %% "kafka" % "0.8.2.2" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
@@ -36,7 +36,7 @@ val zkCommitterDependencies = Seq(kafka) ++ curator
 
 val commonSettings =
 sonatypeSettings ++ scalariformSettings ++ Seq(
-  version := "0.8.3",
+  version := "0.8.3-INTERNAL-as2m1",
   organization := "com.softwaremill.reactivekafka",
   startYear := Some(2014),
   licenses := Seq("Apache License 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
@@ -63,31 +63,31 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
   .setPreference(CompactControlReadability, true)
   .setPreference(SpacesAroundMultiImports, false))
 
-val publishSettings = Seq(
-  publishMavenStyle := true,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
-    if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  },
-  pomIncludeRepository := {
-    x => false
-  },
-  pomExtra := (
-    <scm>
-      <url>git@github.com:softwaremill/reactive-kafka.git</url>
-      <connection>scm:git:git@github.com:softwaremill/reactive-kafka.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>kciesielski</id>
-          <name>Krzysztof Ciesielski</name>
-          <url>https://twitter.com/kpciesielski</url>
-        </developer>
-      </developers>
-    ))
+//val publishSettings = Seq(
+//  publishMavenStyle := true,
+//  publishTo := {
+//    val nexus = "https://oss.sonatype.org/"
+//    if (isSnapshot.value)
+//      Some("snapshots" at nexus + "content/repositories/snapshots")
+//    else
+//      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+//  },
+//  pomIncludeRepository := {
+//    x => false
+//  },
+//  pomExtra := (
+//    <scm>
+//      <url>git@github.com:softwaremill/reactive-kafka.git</url>
+//      <connection>scm:git:git@github.com:softwaremill/reactive-kafka.git</connection>
+//    </scm>
+//      <developers>
+//        <developer>
+//          <id>kciesielski</id>
+//          <name>Krzysztof Ciesielski</name>
+//          <url>https://twitter.com/kpciesielski</url>
+//        </developer>
+//      </developers>
+//    ))
 
 lazy val root =
   project.in( file(".") )
@@ -99,7 +99,7 @@ lazy val root =
 
 lazy val core = project
   .settings(commonSettings)
-  .settings(publishSettings)
+  //.settings(publishSettings)
   .settings(Seq(
     name := "reactive-kafka-core",
     libraryDependencies ++= commonDependencies ++ coreDependencies
@@ -110,6 +110,6 @@ id = "zookeeper-committer",
 base = file("./zookeeper-committer")
 )
   .settings(commonSettings)
-  .settings(publishSettings)
+  //.settings(publishSettings)
   .settings(libraryDependencies ++= commonDependencies ++ zkCommitterDependencies)
   .dependsOn(core % "compile->compile;test->test")

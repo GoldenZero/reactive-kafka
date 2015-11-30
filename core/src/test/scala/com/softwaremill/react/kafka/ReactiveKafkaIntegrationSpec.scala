@@ -102,7 +102,7 @@ class ReactiveKafkaIntegrationSpec
       val supervisor = system.actorOf(Props(new TestHelperSupervisor(self, subscriberProps)))
       val kafkaSubscriberActor = Await.result(supervisor ? "supervise!", atMost = 1 second).asInstanceOf[ActorRef]
       val kafkaSubscriber = ActorSubscriber[String](kafkaSubscriberActor)
-      Source(initialDelay = 100 millis, interval = 1 second, tick = "tick").to(Sink(kafkaSubscriber)).run()
+      Source.tick(initialDelay = 100 millis, interval = 1 second, tick = "tick").to(Sink(kafkaSubscriber)).run()
 
       // when
       EventFilter[ProducerClosedException](message = "producer already closed") intercept {
