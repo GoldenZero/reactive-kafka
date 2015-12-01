@@ -4,8 +4,8 @@ import scalariform.formatter.preferences.{SpacesAroundMultiImports, CompactContr
 
 name := "reactive-kafka"
 
-val akkaVersion = "2.4.0"
-val akkaStreamVersion = "2.0-M1"
+val akkaVersion = "2.4.1"
+val akkaStreamVersion = "2.0-M2"
 val curatorVersion = "2.9.0"
 
 val kafka = "org.apache.kafka" %% "kafka" % "0.8.2.2" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
@@ -36,7 +36,7 @@ val zkCommitterDependencies = Seq(kafka) ++ curator
 
 val commonSettings =
 sonatypeSettings ++ scalariformSettings ++ Seq(
-  version := "0.8.3-INTERNAL-as2m1",
+  version := "0.8.3-INTERNAL-as2m2",
   organization := "com.softwaremill.reactivekafka",
   startYear := Some(2014),
   licenses := Seq("Apache License 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
