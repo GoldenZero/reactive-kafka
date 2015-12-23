@@ -1,5 +1,7 @@
 import SonatypeKeys._
 
+filterScalaLibrary := false
+
 import scalariform.formatter.preferences.{SpacesAroundMultiImports, CompactControlReadability, PreserveSpaceBeforeArguments, DoubleIndentClassDeclaration}
 
 name := "reactive-kafka"
@@ -18,7 +20,7 @@ val commonDependencies = Seq(
 )
 
 val coreDependencies = Seq(
-  "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamVersion,
+  "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamVersion excludeAll(ExclusionRule(organization = "com.typesafe.akka",name = "akka-actor_2.11")),
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   kafka,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.12",
