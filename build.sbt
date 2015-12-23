@@ -8,7 +8,7 @@ val akkaVersion = "2.4.1"
 val akkaStreamVersion = "2.0"
 val curatorVersion = "2.9.0"
 
-val kafka = "org.apache.kafka" %% "kafka" % "0.8.2.2" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
+val kafka = "org.apache.kafka" %% "kafka" % "0.9.0.0" exclude("org.slf4j", "slf4j-log4j12") exclude("log4j", "log4j")
 val curator = Seq("org.apache.curator" % "curator-framework" % curatorVersion,
   "org.apache.curator" % "curator-recipes" % curatorVersion
 )

@@ -202,7 +202,7 @@ private[native] object KafkaSendCommit extends ((BlockingChannel, OffsetCommitRe
   override def apply(channel: BlockingChannel, req: OffsetCommitRequest) = {
     Try {
       channel.send(req)
-      OffsetCommitResponse.readFrom(channel.receive().buffer)
+      OffsetCommitResponse.readFrom(channel.receive().payload())
     }
   }
 }
@@ -211,7 +211,7 @@ private[native] object KafkaSendFetch extends ((BlockingChannel, OffsetFetchRequ
   override def apply(channel: BlockingChannel, req: OffsetFetchRequest) = {
     Try {
       channel.send(req)
-      OffsetFetchResponse.readFrom(channel.receive().buffer)
+      OffsetFetchResponse.readFrom(channel.receive().payload())
     }
   }
 }

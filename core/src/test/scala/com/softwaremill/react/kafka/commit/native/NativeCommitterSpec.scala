@@ -236,8 +236,10 @@ class NativeCommitterSpec extends TestKit(ActorSystem("NativeCommitterSpec"))
 
   private def givenFetchResponse(code: Short, howManyTimes: Int = 10,
     okForChannel: BlockingChannel = mock[BlockingChannel])(implicit f: FixtureParam): Unit = {
+    //TODO check metadata
+    val mdetadata = ""
     def resp(code: Short) =
-      Success(OffsetFetchResponse(Map(TopicAndPartition("topic", 0) -> OffsetMetadataAndError(0, error = code))))
+      Success(OffsetFetchResponse(Map(TopicAndPartition("topic", 0) -> OffsetMetadataAndError(0, mdetadata, error = code))))
 
     var retries = 0
     f.sendFetch = (channel, req) => {

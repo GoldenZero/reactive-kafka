@@ -1,10 +1,11 @@
 package com.softwaremill.react.kafka.commit.native
 
-import kafka.api.{ConsumerMetadataResponse, ConsumerMetadataRequest}
-import kafka.cluster.Broker
+import kafka.api.{GroupCoordinatorResponse, GroupCoordinatorRequest}
+import kafka.cluster.{BrokerEndPoint, Broker}
 import kafka.common.ErrorMapping
 import kafka.consumer.KafkaConsumer
 import kafka.network.BlockingChannel
+import org.apache.kafka.common.protocol.SecurityProtocol
 
 import scala.util.{Failure, Success, Try}
 
@@ -14,7 +15,7 @@ import scala.util.{Failure, Success, Try}
  */
 private[native] class OffsetManagerResolver(
     blockingChannelFactory: (String, Int) => BlockingChannel = KafkaChannelFactory,
-    channelMetadataReader: (BlockingChannel, ConsumerMetadataRequest) => ConsumerMetadataResponse = KafkaChannelReader
+    channelMetadataReader: (BlockingChannel, GroupCoordinatorRequest) => GroupCoordinatorResponse = KafkaChannelReader
 ) {
 
   var correlationId = 0
@@ -47,7 +48,7 @@ private[native] class OffsetManagerResolver(
   }
 
   private def coordinatorOrInitialChannel(
-    coordinator: Broker,
+    coordinator: BrokerEndPoint,
     initialChannel: BlockingChannel
   ): Try[BlockingChannel] = {
     if (coordinator.host == initialChannel.host && coordinator.port == initialChannel.port)
@@ -83,10 +84,10 @@ private[native] class OffsetManagerResolver(
     }.toVector
   }
 
-  private def getCoordinator(channel: BlockingChannel, consumer: KafkaConsumer[_]): Try[Broker] = {
+  private def getCoordinator(channel: BlockingChannel, consumer: KafkaConsumer[_]): Try[BrokerEndPoint] = {
     correlationId = correlationId + 1
     val group = consumer.props.groupId
-    val request = new ConsumerMetadataRequest(group, ConsumerMetadataRequest.CurrentVersion, correlationId)
+    val request = new GroupCoordinatorRequest(group, GroupCoordinatorRequest.CurrentVersion, correlationId)
     Try(channelMetadataReader(channel, request)).flatMap { metadataResponse =>
       if (metadataResponse.errorCode == ErrorMapping.NoError)
         metadataResponse.coordinatorOpt.map(Success(_)).getOrElse(Failure(new IllegalStateException("Missing coordinator")))
@@ -120,9 +121,9 @@ private[native] object KafkaChannelFactory extends ((String, Int) => BlockingCha
 }
 
 private[native] object KafkaChannelReader
-    extends ((BlockingChannel, ConsumerMetadataRequest) => ConsumerMetadataResponse) {
-  override def apply(channel: BlockingChannel, request: ConsumerMetadataRequest): ConsumerMetadataResponse = {
+    extends ((BlockingChannel, GroupCoordinatorRequest) => GroupCoordinatorResponse) {
+  override def apply(channel: BlockingChannel, request: GroupCoordinatorRequest): GroupCoordinatorResponse = {
     channel.send(request)
-    ConsumerMetadataResponse.readFrom(channel.receive().buffer)
+    GroupCoordinatorResponse.readFrom(channel.receive().payload())
   }
 }

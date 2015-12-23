@@ -1,7 +1,6 @@
 package com.softwaremill.react.kafka.commit.native
 
 import com.softwaremill.react.kafka.commit._
-import kafka.api.{ConsumerMetadataRequest, ConsumerMetadataResponse}
 import kafka.cluster.Broker
 import kafka.common.ErrorMapping
 import kafka.consumer.KafkaConsumer

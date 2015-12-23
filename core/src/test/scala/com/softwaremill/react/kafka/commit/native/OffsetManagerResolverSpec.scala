@@ -3,11 +3,12 @@ package com.softwaremill.react.kafka.commit.native
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import com.softwaremill.react.kafka.{ConsumerProperties, KafkaTest}
-import kafka.api.{ConsumerMetadataRequest, ConsumerMetadataResponse}
-import kafka.cluster.Broker
+import kafka.api.{GroupCoordinatorRequest, GroupCoordinatorResponse}
+import kafka.cluster.{BrokerEndPoint, Broker}
 import kafka.common.ErrorMapping
 import kafka.consumer.KafkaConsumer
 import kafka.network.BlockingChannel
+import org.apache.kafka.clients.consumer.internals.ConsumerCoordinator
 import org.mockito.BDDMockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, Matchers, fixture}
@@ -22,6 +23,7 @@ class OffsetManagerResolverSpec extends TestKit(ActorSystem("OffsetManagerResolv
 
   case class OffsetManagerFixture() {
     var consumer: KafkaConsumer[String] = _
+
     def createConsumer(consumerProperties: ConsumerProperties[String]) = {
       consumer = new KafkaConsumer(consumerProperties)
       consumer
@@ -144,13 +146,17 @@ class OffsetManagerResolverSpec extends TestKit(ActorSystem("OffsetManagerResolv
   def broker(hostAndPort: String) = {
     val host = hostAndPort.split(":")(0)
     val port = hostAndPort.split(":")(1).toInt
-    Some(new Broker(1, host, port))
+    Some(new BrokerEndPoint(1, host, port))
   }
 
-  def givenCoordinatorMetadata(coordinator: Option[Broker], errorCode: Short) =
-    new ConsumerMetadataResponse(coordinator, errorCode)
+  def givenCoordinatorMetadata(coordinator: Option[BrokerEndPoint], errorCode: Short) =
+    new GroupCoordinatorResponse(
+      coordinatorOpt = coordinator,
+      errorCode = errorCode,
+      correlationId = 1 //correlationId: This is a user-supplied integer. It will be passed back in the response by the server, unmodified. It is useful for matching request and response between the client and server
+    )
 
-  def givenCoordinatorRequestWillReturn(metadata: ConsumerMetadataResponse) = {
-    (channel: BlockingChannel, request: ConsumerMetadataRequest) => metadata
+  def givenCoordinatorRequestWillReturn(metadata: GroupCoordinatorResponse) = {
+    (channel: BlockingChannel, request: GroupCoordinatorRequest) => metadata
   }
 }
