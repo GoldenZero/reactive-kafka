@@ -67,29 +67,20 @@ testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
 
 val publishSettings = Seq(
   publishMavenStyle := true,
-  publishTo := {
-    val nexus = "https://oss.sonatype.org/"
+
+  publishTo := Some{
     if (isSnapshot.value)
-      Some("snapshots" at nexus + "content/repositories/snapshots")
+      "Qordoba snapshots" at "http://master.qordobadev.com:8088/artifactory/qordoba-snapshots"
     else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+      "Qordoba releases" at "http://master.qordobadev.com:8088/artifactory/qordoba-releases"
   },
+
+  credentials += Credentials(Path.userHome / ".ivy2" / ".qordobaArtifactoryDeployerCredentials"),
+
   pomIncludeRepository := {
     x => false
-  },
-  pomExtra := (
-    <scm>
-      <url>git@github.com:softwaremill/reactive-kafka.git</url>
-      <connection>scm:git:git@github.com:softwaremill/reactive-kafka.git</connection>
-    </scm>
-      <developers>
-        <developer>
-          <id>kciesielski</id>
-          <name>Krzysztof Ciesielski</name>
-          <url>https://twitter.com/kpciesielski</url>
-        </developer>
-      </developers>
-    ))
+  }
+  )
 
 lazy val root =
   project.in( file(".") )
