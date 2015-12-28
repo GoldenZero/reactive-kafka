@@ -20,7 +20,7 @@ val commonDependencies = Seq(
 )
 
 val coreDependencies = Seq(
-  "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamVersion excludeAll(ExclusionRule(organization = "com.typesafe.akka",name = "akka-actor_2.11")),
+  "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamVersion excludeAll (ExclusionRule(organization = "com.typesafe.akka", name = "akka-actor_2.11")),
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   kafka,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.12",
@@ -36,8 +36,7 @@ val coreDependencies = Seq(
 
 val zkCommitterDependencies = Seq(kafka) ++ curator
 
-val commonSettings =
-sonatypeSettings ++ scalariformSettings ++ Seq(
+val commonSettings = scalariformSettings ++ Seq(
   version := "0.9.0-SNAPSHOT",
   organization := "com.softwaremill.reactivekafka",
   startYear := Some(2014),
@@ -46,48 +45,46 @@ sonatypeSettings ++ scalariformSettings ++ Seq(
   scalaVersion := "2.11.7",
   crossScalaVersions := Seq("2.10.5", "2.11.7"),
   scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding", "UTF-8",       // yes, this is 2 args
-  "-feature",
-  "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
-  "-Xfuture"
-),
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
+    "-deprecation",
+    "-encoding", "UTF-8", // yes, this is 2 args
+    "-feature",
+    "-unchecked",
+    "-Xfatal-warnings",
+    "-Xlint",
+    "-Yno-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard",
+    "-Xfuture"
+  ),
+  testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
   ScalariformKeys.preferences := ScalariformKeys.preferences.value
-  .setPreference(DoubleIndentClassDeclaration, true)
-  .setPreference(PreserveSpaceBeforeArguments, true)
-  .setPreference(CompactControlReadability, true)
-  .setPreference(SpacesAroundMultiImports, false))
+    .setPreference(DoubleIndentClassDeclaration, true)
+    .setPreference(PreserveSpaceBeforeArguments, true)
+    .setPreference(CompactControlReadability, true)
+    .setPreference(SpacesAroundMultiImports, false))
 
 val publishSettings = Seq(
-  publishMavenStyle := true,
+  publishMavenStyle := false,
 
-  publishTo := Some{
+  publishArtifact in ThisBuild := true,
+
+  publishTo := Some {
     if (isSnapshot.value)
-      "Qordoba snapshots" at "http://master.qordobadev.com:8088/artifactory/qordoba-snapshots"
+      Resolver.url("Qordoba snapshots", url("http://master.qordobadev.com:8088/artifactory/qordoba-snapshots"))(Resolver.ivyStylePatterns)
     else
-      "Qordoba releases" at "http://master.qordobadev.com:8088/artifactory/qordoba-releases"
+      Resolver.url("Qordoba releases", url("http://master.qordobadev.com:8088/artifactory/qordoba-releases"))(Resolver.ivyStylePatterns)
   },
 
-  credentials += Credentials(Path.userHome / ".ivy2" / ".qordobaArtifactoryDeployerCredentials"),
-
-  pomIncludeRepository := {
-    x => false
-  }
-  )
+  credentials += Credentials(Path.userHome / ".ivy2" / ".qordobaArtifactoryDeployerCredentials")
+)
 
 lazy val root =
-  project.in( file(".") )
+  project.in(file("."))
     .settings(commonSettings)
     .settings(Seq(
-    publishArtifact := false,
-    publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))))
+      publishArtifact := false,
+      publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))))
     .aggregate(zookeeperCommitter, core)
 
 lazy val core = project
@@ -96,11 +93,11 @@ lazy val core = project
   .settings(Seq(
     name := "reactive-kafka-core",
     libraryDependencies ++= commonDependencies ++ coreDependencies
-))
+  ))
 
 lazy val zookeeperCommitter = Project(
-id = "zookeeper-committer",
-base = file("./zookeeper-committer")
+  id = "zookeeper-committer",
+  base = file("./zookeeper-committer")
 )
   .settings(commonSettings)
   .settings(publishSettings)
